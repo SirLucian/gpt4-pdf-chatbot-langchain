@@ -54,7 +54,13 @@ PINECONE_INDEX_NAME=
 
 4. In the `config` folder, replace the `PINECONE_NAME_SPACE` with a `namespace` where you'd like to store your embeddings on Pinecone when you run `npm run ingest`. This namespace will later be used for queries and retrieval.
 
-5. In `utils/makechain.ts` chain change the `QA_PROMPT` for your own usecase. Change `modelName` in `new OpenAI` to `gpt-4`, if you have access to `gpt-4` api. Please verify outside this repo that you have access to `gpt-4` api, otherwise the application will not work.
+5. # In `utils/makechain.ts` chain change the `QA_PROMPT` for your own usecase. Change `modelName` in `new OpenAI` to `gpt-4`, if you have access to `gpt-4` api. Please verify outside this repo that you have access to `gpt-4` api, otherwise the application will not work.
+
+6. In `config/pinecone.ts`, replace the `PINECONE_INDEX_NAME` with the index name you
+   created on Pinecone. Edit the `TOPICS` to match your desired topics, namespaces,
+   and prompts. There should be a matching folder in `docs` for each of your topics. **THE FOLDER MUST EXACTLY MATCH THE TOPIC'S NAMESPACE AND MUST ONLY CONTAIN LOWER CASE LETTERS A-Z AND HYPHENS.**
+
+7. In `utils/makechain.ts` chain adjust the `QA_PROMPT` according to your use case. Change `modelName` in `new OpenAIChat` to a different api model if you don't have access to `gpt-4`. See [the OpenAI docs](https://platform.openai.com/docs/models/model-endpoint-compatibility) for a list of supported `modelName`s. For example you could use `gpt-3.5-turbo` if you do not have access to `gpt-4`, yet.
 
 ## Convert your PDF files to embeddings
 
@@ -64,7 +70,10 @@ PINECONE_INDEX_NAME=
 
 2. Run the script `npm run ingest` to 'ingest' and embed your docs. If you run into errors troubleshoot below.
 
-3. Check Pinecone dashboard to verify your namespace and vectors have been added.
+3. In `docs` add PDFs into the relevant folder for each topic. ChatGPT will show which PDF it referred to in the sources so give your PDFs descriptive names.
+
+4. Run the script `pnpm run ingest` to 'ingest' and embed your docs
+5. Check Pinecone dashboard to verify your namespace and vectors have been added.
 
 ## Run the app
 
@@ -90,9 +99,14 @@ In general, keep an eye out in the `issues` and `discussions` section of this re
 
 - Make sure your pinecone dashboard `environment` and `index` matches the one in the `pinecone.ts` and `.env` files.
 - Check that you've set the vector dimensions to `1536`.
-- Make sure your pinecone namespace is in lowercase.
-- Pinecone indexes of users on the Starter(free) plan are deleted after 7 days of inactivity. To prevent this, send an API request to Pinecone to reset the counter before 7 days.
-- Retry from scratch with a new Pinecone project, index, and cloned repo.
+- Switch your Environment in pinecone to `us-east1-gcp` if the other environment is causing issues.
+
+**Deleting a namespace**
+
+- If you need to clear a namespace and to re-ingest it again you can edit the target namespace and the
+  target index in `scripts/delete-namespace.ts` and then perform `pnpm run delete-namespace`
+
+If you're stuck after trying all these steps, delete `node_modules`, restart your computer, then `pnpm install` again.
 
 ## Credit
 

@@ -3,21 +3,13 @@ import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { makeChain } from '@/utils/makechain';
 import { pinecone } from '@/utils/pinecone-client';
-import { usePineconeStore } from '@/config/pinecone';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { question, history, currentNamespace, currentIndex } = req?.body;
+  const { question, history, currentNamespace, currentIndex } = req.body;
   console.log(currentNamespace, currentIndex);
-  console.log('question', question);
-
-  //only accept post requests
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' });
-    return;
-  }
 
   if (!question) {
     return res.status(400).json({ message: 'No question in the request' });
@@ -31,6 +23,9 @@ export default async function handler(
   const vectorStore = await PineconeStore.fromExistingIndex(
     index,
     new OpenAIEmbeddings({}),
+    'text',
+    currentNamespace, //optional namespace
+  );
 
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
