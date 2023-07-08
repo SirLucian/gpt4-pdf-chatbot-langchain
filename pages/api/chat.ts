@@ -3,14 +3,14 @@ import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { makeChain } from '@/utils/makechain';
 import { pinecone } from '@/utils/pinecone-client';
-import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
+import { usePineconeStore } from '@/config/pinecone';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { question, history } = req.body;
-
+  const { question, history, currentNamespace, currentIndex } = req?.body;
+  console.log(currentNamespace, currentIndex);
   console.log('question', question);
 
   //only accept post requests
@@ -24,6 +24,30 @@ export default async function handler(
   }
   // OpenAI recommends replacing newlines with spaces for best results
   const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
+
+  const index = pinecone.Index(currentIndex);
+
+  /* create vectorstore*/
+  const vectorStore = await PineconeStore.fromExistingIndex(
+    index,
+    new OpenAIEmbeddings({}),
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+  });
+
+  const sendData = (data: string) => {
+    res.write(`data: ${data}\n\n`);
+  };
+
+  sendData(JSON.stringify({ data: '' }));
+
+  //create chain
+  const chain = makeChain(vectorStore, (token: string) => {
+    sendData(JSON.stringify({ data: token }));
+  });
 
   try {
     const index = pinecone.Index(PINECONE_INDEX_NAME);

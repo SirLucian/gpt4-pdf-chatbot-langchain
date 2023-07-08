@@ -6,8 +6,12 @@ if (!process.env.PINECONE_INDEX_NAME) {
   throw new Error('Missing Pinecone index name in .env file');
 }
 
-const PINECONE_INDEX_NAME = process.env.PINECONE_INDEX_NAME ?? '';
-
-const PINECONE_NAME_SPACE = 'pdf-test'; //namespace is optional for your vectors
-
-export { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE };
+export const usePineconeStore = create<PineconeState>((set) => ({
+  PINECONE_NAME_SPACE: TOPICS[0],
+  PINECONE_INDEX_NAME: PINECONE_INDEX_NAME,
+  setPineconeNamespace: (namespace: {
+    TOPIC: string;
+    NAMESPACE: string;
+    PROMPT?: string;
+  }) => set({ PINECONE_NAME_SPACE: namespace }),
+}));
