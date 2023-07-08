@@ -28,7 +28,7 @@
     "react-dom": "18.2.0",
     "react-markdown": "^8.0.7",
     "tailwind-merge": "^1.13.2",
-    "zustand": "^4.3.9"
+    "zustand": "^4.3.9",
   },
   "devDependencies": {
     "@types/node": "^18.16.19",
